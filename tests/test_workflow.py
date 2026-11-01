@@ -97,10 +97,10 @@ class WorkflowTests(unittest.TestCase):
         initialized = initialize_workspace(root)
         self.assertEqual(initialized, root)
         self.assertTrue((root / 'data').is_dir())
+        self.assertFalse(list(root.rglob('*.pyc')))
         self.assertEqual(current_defaults(root)['checkerboard']['n_pert_x'], 2)
         self.assertFalse(list(root.rglob('*.h5')))
         self.assertFalse(list(root.rglob('src_rec*.dat')))
-        self.assertFalse(list(root.rglob('*.pyc')))
         before = (root / 'Scripts/prepare_files.py').read_bytes()
         with self.assertRaises(FileExistsError):
             initialize_workspace(root)
