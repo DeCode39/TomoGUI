@@ -1,0 +1,20 @@
+# Dual anisotropy example (no velocity perturbation)
+#
+# Top 20 km:     fast direction N-S (phi=90)
+# Next 20 km:    fast direction E-W (phi=0)
+# Velocity stays equal to the baseline model everywhere.
+
+# These path fields are rewritten automatically by prepare_custom_files.py.
+par_file=../RESULTS/TEST/checkerboard_P/3_input_params/input_params_signal.yaml
+output_model=./dual_anisotropy_ns_ew.h5
+background=from_h5
+background_model=./model_init_placeholder.h5
+
+# Optional safety clip (kept broad to preserve baseline values)
+clip_vel_min=1.0
+clip_vel_max=20.0
+
+# Anisotropy-only edits
+shape layer dep_min=0 dep_max=20 eps=0.05 phi_deg=90
+shape layer dep_min=20 dep_max=40 eps=0.05 phi_deg=0
+

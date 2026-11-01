@@ -1,0 +1,317 @@
+[
+  {
+    "source": "RESULTS/JpGU/templates/checkerboard_P_paper_base/prepare_input_files.py",
+    "source_sha256": "e994533491de26a7f5452e289cbee46e1dae8932076c129d8da541873e70ee94",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/JpGU/templates/checkerboard_S_paper_base/prepare_input_files.py",
+    "source_sha256": "8dacfd41fa8eb8dbee91cf2bfb0838d237a5955984f9365cc92bb2553ed8ff5c",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/3_input_params/input_params_inv.yaml",
+    "source_sha256": "1dce39b571d21048e1d7b74270ca5f44106c8f462e0d6239f54945da17c2bbd5",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/3_input_params/input_params_signal.yaml",
+    "source_sha256": "8e716791613a25cb3d93077e1ba0d2dafece5520b5aa327dc31e00b8448a9839",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/assign_gaussian_noise.py",
+    "source_sha256": "4422eb9831d43df04663fcbaf314ade4762a98f1e17e76fb684be5bbda883424",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/plot_output.py",
+    "source_sha256": "67392e32449bc1fb5c580d8f5882b8718178513b29135b3571e2ad56b91e7a60",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/prepare_input_files.py",
+    "source_sha256": "cf898a9c35c502cc591463a01113a534f11fbeeb8721679dbba8feb767f81314",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/run_this_example.sh",
+    "source_sha256": "2c438b5580f1db8cabbf103c977c9c5fc619473b541e6108cdd4d7cd9ffd6f70",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_P/run_this_example_slurm.sh",
+    "source_sha256": "4e3941e1b227e0f9c620a2af7347cfdc27d79746a4ddf352b3fa094379b84394",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/3_input_params/input_params_inv.yaml",
+    "source_sha256": "1dce39b571d21048e1d7b74270ca5f44106c8f462e0d6239f54945da17c2bbd5",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/3_input_params/input_params_signal.yaml",
+    "source_sha256": "8e716791613a25cb3d93077e1ba0d2dafece5520b5aa327dc31e00b8448a9839",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/assign_gaussian_noise.py",
+    "source_sha256": "4422eb9831d43df04663fcbaf314ade4762a98f1e17e76fb684be5bbda883424",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/plot_output.py",
+    "source_sha256": "913b3f93ca6d3d26bc4bd3a87aa68996bdae8a4be668534ac9bfa9cfd489e2d1",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/prepare_input_files.py",
+    "source_sha256": "e547a9c7324d123aee51cab24079a302f0c71fb9dadef9d70939fc2ced9f6e13",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/run_this_example.sh",
+    "source_sha256": "2c438b5580f1db8cabbf103c977c9c5fc619473b541e6108cdd4d7cd9ffd6f70",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/checkerboard_S/run_this_example_slurm.sh",
+    "source_sha256": "4e3941e1b227e0f9c620a2af7347cfdc27d79746a4ddf352b3fa094379b84394",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/3_input_params/input_params_joint_step1.yaml",
+    "source_sha256": "e5a86457a88fbd2223105b414167ce2943ea076ee8a721900591ff20d47c0b23",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/3_input_params/input_params_joint_step2.yaml",
+    "source_sha256": "8208dc78f472b6187a3748af090278254b63606d7e7f426a9b18fc25dff68c75",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/3_input_params/input_params_joint_step3.yaml",
+    "source_sha256": "6517818186624255cb9a3d393a1eb73b6321f6fb41f2223d4fbf4dd86c7d403d",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/3_input_params/input_params_signal.yaml",
+    "source_sha256": "fe56616aff157618d376ab1716d850e4832bf90acb3e68aad5915a76799e9eb9",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/assign_gaussian_noise.py",
+    "source_sha256": "37ab2a77658117c498e2aaa68770fee7fac871b84339d126d454d56c14ff740e",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/plot_output.py",
+    "source_sha256": "fe92fecce40d32409e6dab18d495f16c169ff77374eb5f0ce738df02a3196374",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/prepare_input_files.py",
+    "source_sha256": "ff50e20bf55f6ffa55366f9c06ac9ff24c8b7ed52eb5c96d45419e97929a7108",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/run_this_example.sh",
+    "source_sha256": "4d66d8497c445a4c92db18673da445bdc374930e2e994c6fd91c034f83d85980",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/inversion_P/run_this_example_slurm.sh",
+    "source_sha256": "e687a6019b8b8e3dce490f1cefc90ec30e366ae501249ce0edd92296434d4657",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/3_input_params/input_params_joint_step1.yaml",
+    "source_sha256": "e5a86457a88fbd2223105b414167ce2943ea076ee8a721900591ff20d47c0b23",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/3_input_params/input_params_joint_step2.yaml",
+    "source_sha256": "8208dc78f472b6187a3748af090278254b63606d7e7f426a9b18fc25dff68c75",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/3_input_params/input_params_joint_step3.yaml",
+    "source_sha256": "6517818186624255cb9a3d393a1eb73b6321f6fb41f2223d4fbf4dd86c7d403d",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/3_input_params/input_params_signal.yaml",
+    "source_sha256": "fe56616aff157618d376ab1716d850e4832bf90acb3e68aad5915a76799e9eb9",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/assign_gaussian_noise.py",
+    "source_sha256": "37ab2a77658117c498e2aaa68770fee7fac871b84339d126d454d56c14ff740e",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/plot_output.py",
+    "source_sha256": "f0d17d0f743632aa40d645290e2abec8668f7eefcd7eb47bfb692fc5e5830dd8",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/prepare_input_files.py",
+    "source_sha256": "e7903a2a11fc7fddb272dfd84cc59fa930dddd8f154be9929f398bc7f5562206",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/run_this_example.sh",
+    "source_sha256": "4d66d8497c445a4c92db18673da445bdc374930e2e994c6fd91c034f83d85980",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/inversion_S/run_this_example_slurm.sh",
+    "source_sha256": "e687a6019b8b8e3dce490f1cefc90ec30e366ae501249ce0edd92296434d4657",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "RESULTS/TEST/inversion_VpVs/3_input_params/input_params_ref.yaml",
+    "source_sha256": "bad8fb2287f9ea148c36146f55fa8a1b10bbb669f5db575e265e9b5dee413c33",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/TEST/inversion_VpVs/plot_output.py",
+    "source_sha256": "a38bbf53fc366e7fdf947b784375b131282efa3fafc639832f75e2ca950cc012",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/resolution_kd_sweep/prepare_resolution_kd_sweep.py",
+    "source_sha256": "b201097498ed22fa00431f686b68125011246f66e9d98a87d19497161db19b02",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/resolution_kd_sweep/resolution_window.py",
+    "source_sha256": "1b301c562a41e31442104c253f30f53b641881c2e92ce2c1a1b43eecf165aeaf",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/resolution_kd_sweep/score_resolution_kd_sweep.py",
+    "source_sha256": "1261390e72bf5cae31a9df0fa75918ec724e2eef8f64d52d47a781331f58d239",
+    "changes": []
+  },
+  {
+    "source": "Scripts/build_azcov_archive.py",
+    "source_sha256": "00b3e9f2e7c590e8d6f2587129cdc1a49986643b160af49e2eb33a6484d23b33",
+    "changes": []
+  },
+  {
+    "source": "Scripts/clean_run_results.sh",
+    "source_sha256": "0dc22b8393624f1eb371cc21385b526eec227bf1265a0d09bb67ce42d2dabb6c",
+    "changes": [
+      "Removed site-specific Slurm account/partition and conda activation"
+    ]
+  },
+  {
+    "source": "Scripts/convert_cwb_to_src_rec.py",
+    "source_sha256": "cbff9862b60922e581b08b07cb53d0a3b5badd3d9b4289f50e33912d982eca83",
+    "changes": []
+  },
+  {
+    "source": "Scripts/convert_salute_to_src_rec.py",
+    "source_sha256": "08785c659e94aedbaf50981f8df040af2309243797aaba55c5aa9cf441db0a63",
+    "changes": []
+  },
+  {
+    "source": "Scripts/generate_vpvs_folder.py",
+    "source_sha256": "1891b1c3bcf2dd93b4b9f98574828ad557ab22eec3bf18057e47f04e97e0ec8c",
+    "changes": []
+  },
+  {
+    "source": "Scripts/plot_azimuthal_coverage.py",
+    "source_sha256": "c79b0e9a109da24b2dd67f7b3277b15b5207ae4c8a60ead830802a9eba745f87",
+    "changes": []
+  },
+  {
+    "source": "Scripts/plot_qc.py",
+    "source_sha256": "6c93536c492480de25d61c2e5f7d3646cc5807965ba6b5b3696549a0363dd2d5",
+    "changes": []
+  },
+  {
+    "source": "Scripts/plot_single_ray_trace.py",
+    "source_sha256": "ecbd8a6a561c3dd555977ba63e240ca9b6e7d06df962887f2e04f297533fd182",
+    "changes": []
+  },
+  {
+    "source": "Scripts/prepare_files.py",
+    "source_sha256": "e43fc94d8c3b80538ed30277266687dffe5aced3aad8ad0cb984387d808cc3cf",
+    "changes": []
+  },
+  {
+    "source": "Scripts/region_scanner_cwb_square.py",
+    "source_sha256": "0adb06890ba209965910a465547ed99766ea34d927d15b5ae6a18a7b07f9923c",
+    "changes": []
+  },
+  {
+    "source": "Scripts/region_scanner_pipeline.py",
+    "source_sha256": "1ac013e616b1fb8f532fd6438122431ff231bd9b428bb9c9bb1fd320e77627bd",
+    "changes": []
+  },
+  {
+    "source": "Scripts/run_postprocess.py",
+    "source_sha256": "7775de3aed075785eb16a766605b1cacd430aac55a9d138a728c32f7a82736c4",
+    "changes": []
+  },
+  {
+    "source": "custom_models/build_custom_model.py",
+    "source_sha256": "4330fb9b569e422a992508d840174977c32661524e05c2b133435b198ea78287",
+    "changes": []
+  },
+  {
+    "source": "custom_models/model_definitions/dual_anisotropy_ns_ew.txt",
+    "source_sha256": "cca271eadf4207beb5eaf16ffb7a601d34219b1a1ed54e64c77425b6df836734",
+    "changes": []
+  },
+  {
+    "source": "h5_viewer/__init__.py",
+    "source_sha256": "4b63d3dcd941691475d5e9681d7da59b2e98fb04dc17c2c4b49a4a27f244d46c",
+    "changes": []
+  },
+  {
+    "source": "h5_viewer/data_model.py",
+    "source_sha256": "26cc6039a543beee1bee077160ce516a52195576c47970d242ba2dee606eac8d",
+    "changes": []
+  },
+  {
+    "source": "h5_viewer/expression_engine.py",
+    "source_sha256": "bbb92938cb9f20268283b780f66cde28211dccca386d0548bd0c674956264576",
+    "changes": []
+  },
+  {
+    "source": "h5_viewer/readers.py",
+    "source_sha256": "3b1f95bf5d7a021f6aeaf14ac859037b80e274be878777129e90ec8900c92ca9",
+    "changes": []
+  },
+  {
+    "source": "h5_viewer/utils.py",
+    "source_sha256": "c510529da910c8bfb4a17b18e48c78e72766c129e3593f3cef729403c0fe5dfd",
+    "changes": []
+  },
+  {
+    "source": "RESULTS/JpGU/build_jpgu_resolution_sweeps.py",
+    "source_sha256": "0b481f11f701a55fb5857b8b0593858d5e7bb81d4c8fed3d96217240c87f7fe2",
+    "changes": [
+      "Only the KDENSITY_VALUES setting is needed and included"
+    ]
+  }
+]

@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+# Preserve whitespace in the reused scientific sources instead of rewriting it.
+src/tomogui/resources/** whitespace=-trailing-space,-blank-at-eof
