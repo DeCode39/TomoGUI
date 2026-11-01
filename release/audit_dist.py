@@ -35,7 +35,7 @@ def main():
             if path.suffix.lower() in {'.pyc', '.pyo', '.h5', '.hdf5', '.dat', '.csv'}:
                 raise SystemExit(f'Data/cache file included: {name}')
         for relative in required:
-            if not any(name.endswith('/tomogui/resources/workflow/' + relative) for name in names):
+            if not any(name.endswith('tomogui/resources/workflow/' + relative) for name in names):
                 raise SystemExit(f'Missing packaged resource: {relative}')
         print(f'Archive audit passed: {archive.name} ({len(names)} entries)')
 
