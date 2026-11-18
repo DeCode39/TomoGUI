@@ -30,22 +30,24 @@ are mounted as `/mnt/c`, `/mnt/e`, etc.; no drive letters are used in Linux path
 
 ## 2. Download a versioned source release
 
-For private repository access using GitHub CLI:
+The repository and release assets are public. No GitHub login is required:
 
 ```bash
-sudo apt install -y gh
-gh auth login
-gh auth setup-git
 git clone https://github.com/DeCode39/TomoGUI.git
 cd TomoGUI
-git switch --detach v0.1.0
+git switch --detach v0.2.0
 ```
 
-GitHub SSH authentication or downloading a source archive from the release page
-are alternatives. A private repository requires explicit access; installing
-TomoATT does not grant access to TomoGUI. If you already have the checkout, run
+Downloading a source archive from the release page is an alternative.
+If you already have the checkout, run
 `git fetch --tags` before selecting a release tag. Local changes should be
 committed or saved before changing versions.
+
+For an existing installation, activate its Linux environment, fetch the tag,
+switch to `v0.2.0`, then rerun `python -m pip install ".[workflow]"`. Restart the
+server and reload the browser. Generate a new run for the new CS/CR workflow:
+v0.1 run manifests lack the saved quality and reference catalogue required for
+safe pair selection. Existing runs/results are retained.
 
 ## 3. Install Python dependencies
 

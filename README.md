@@ -4,7 +4,7 @@ A clean, local browser interface for preparing and inspecting TomoATT projects.
 TomoGUI runs Python on Linux or WSL and opens at **http://127.0.0.1:8766**.
 The TomoATT solver is a separate installation.
 
-**Status:** v0.1.0, alpha. Releases use versioned Git tags and GitHub release
+**Status:** v0.2.0, alpha. Releases use versioned Git tags and GitHub release
 assets. Nothing is published to PyPI by this project.
 
 ## What you can do
@@ -14,6 +14,9 @@ assets. Nothing is published to PyPI by this project.
 - Map numeric quality, formulas, or alphabetical grades to pick weights.
 - Drag region rectangle corners or edit geographic/depth bounds and filters.
 - Preview actual checkerboard HDF5 models and change their counts/amplitudes.
+- Validate 8/4/2 sinusoidal checkerboards against model-cell and domain limits.
+- Preview filtered CS/CR pairs, compare paired resolution tests, and stage a
+  separate refinement from the absolute-only final model and catalogue.
 - Tune model/inversion grid estimates while retaining the workflow defaults.
 - Preview run folders before writing them. Follow resolution Kd estimation,
   checkerboard validation, then actual-data inversion.
@@ -52,14 +55,12 @@ sudo apt install -y git python3 python3-venv python3-pip ca-certificates
 python3 --version  # must be 3.10 or newer
 ```
 
-Authenticate Git first if the repository is private. For example, install `gh`
-with your OS package manager, run `gh auth login`, then `gh auth setup-git`.
-Alternatively, use an SSH clone with your existing GitHub SSH key.
+The repository is public; cloning and downloading releases require no account.
 
 ```bash
 git clone https://github.com/DeCode39/TomoGUI.git
 cd TomoGUI
-git switch --detach v0.1.0
+git switch --detach v0.2.0
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -118,7 +119,7 @@ Download the wheel from the matching [GitHub release](https://github.com/DeCode3
 and activate a Python venv, then run:
 
 ```bash
-python -m pip install './tomogui-0.1.0-py3-none-any.whl[workflow]'
+python -m pip install './tomogui-0.2.0-py3-none-any.whl[workflow]'
 tomogui --init "$HOME/tomogui-projects/example"
 ```
 
@@ -132,9 +133,11 @@ if checking the entire checksums file).
 
 The bundled defaults preserve the maintained research helpers:
 
-- Checkerboard counts `[2, 2, 2]`, velocity amplitude `0.2`, anisotropy `0.1`,
-  direction `60` degrees; the existing dual-layer anisotropy preset keeps
-  velocity unchanged.
+- Smooth sinusoidal checkerboards, with default validation sets `[8,8,8]`,
+  `[4,4,4]` and `[2,2,2]`. Each checker must span at least two model-grid cells
+  per axis and at most half that axis's domain span. The preview initially uses
+  the current `[2,2,2]` template, velocity amplitude `0.2`, anisotropy `0.1`,
+  direction `60` degrees. The dual-layer preset keeps velocity unchanged.
 - Model-grid lateral scale `1`, depth spacing `1 km`, inversion counts at `75%`.
   Phase-specific final src_rec spacing is used; controls allow explicit tuning.
 - Import preserves weights. Run generation omits receiver/pick weight columns
@@ -143,9 +146,18 @@ The bundled defaults preserve the maintained research helpers:
 - Kd estimation automatically stages 3 sinusoidal wavelengths and 8 coefficients
   per phase: 24 inversion cases plus 3 shared signal/noise calculations. The
   original 3% sinusoidal model settings, wave weights and seeds are reused.
+  Invalid wavelengths block generation. Explicit wavelength fitting is optional,
+  off by default, and records original and effective values in the manifest.
 - Scoring applies the highest complete weighted score per phase. Review
   checkerboard recovery and accept it before launching actual-data inversion.
   No coefficient is selected from missing or fabricated solver outputs.
+- The baseline runs ABS-only relocation -> joint inversion -> relocation.
+  Optional refinement starts from its final model and observed catalogue:
+  ABS+CR -> ABS+CR+CS -> ABS+regenerated CR. CR requires both picks at the
+  selected top quality and 3D source separation <10 km; CS requires azimuth
+  gap <30 degrees and baseline event displacement <3 km. All limits are editable.
+  A new paired 8/4/2 resolution suite must be completed, scored and accepted
+  before the actual refinement can run.
 
 New project artifacts and logs go in `.tomogui/`; original inputs are not edited.
 Run-folder previews create no run artifacts. Generated runners use the current
@@ -177,7 +189,7 @@ python -m twine check dist/*
 Tests initialize isolated projects from packaged resources. No original research
 workspace or TomoATT solver execution is needed. Optional browser checks are
 documented in `docs/WORKFLOW.md`. Production MPI/HPC inversions are not covered
-by this first release's validation.
+by this release's validation.
 
 ## License and upstream projects
 

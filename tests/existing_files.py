@@ -51,8 +51,8 @@ def main():
             'depth_min': 0, 'depth_max': 155}, 'settings': {'require_all_azimuth_bins': False}})
         ws.update_state(**filtered['state_updates'])
         # Explicitly tune the test grid to limit disk use across 72 sweep cases.
-        payload = {'name': 'Acceptance_' + name, 'phases': ['P'],
-                   'grid': {'receiver_spacing': 12, 'depth_spacing': 5}}
+        payload = {'name': 'Acceptance_' + name, 'phases': ['P'], 'fit_kd_waves': True,
+                   'grid': {'receiver_spacing': 5, 'depth_spacing': 5}}
         snapshots = set(ws.state_dir.rglob('*'))
         plan = preview(ws, payload)
         assert snapshots == set(ws.state_dir.rglob('*')), 'Folder preview wrote files'

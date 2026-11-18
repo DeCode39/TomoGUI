@@ -3,7 +3,7 @@ from pathlib import Path
 from test_workflow import make_workspace
 from tomogui.server import create_server
 
-root=(Path(__file__).resolve().parents[1]/'.test-output/browser-workspace-v2').resolve()
+root=(Path(__file__).resolve().parents[1]/'.test-output/browser-workspace-v020').resolve()
 assert root.is_relative_to(Path(__file__).resolve().parents[1]/'.test-output')
 if not root.exists():
     root.mkdir(parents=True)

@@ -62,7 +62,8 @@ def current_defaults(root: Path) -> dict:
             "kdensity": config["model_update"]["optim_method_0"]["Kdensity_coe"],
             "sequence": ["resolution_kd", "checkerboard", "inversion"],
             "kd_candidates": resolution_defaults(root)['candidates'],
-            "kd_workflow": resolution_defaults(root)}
+            "kd_workflow": resolution_defaults(root),
+            "checker_presets": [8,4,2]}
 
 
 def grid_estimate(root: Path, metadata: dict, tuning: dict | None = None) -> dict:

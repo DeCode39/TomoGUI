@@ -18,9 +18,10 @@ from .workspace import load_module
 class Event:
     parts: list[str]
     picks: list[list[str]] = field(default_factory=list)
+    differentials: list[list[str]] = field(default_factory=list)
 
 
-def read_src_rec(path: Path) -> list[Event]:
+def read_src_rec(path: Path, *, allow_differential: bool = False) -> list[Event]:
     events = []
     event = None
     with path.open(encoding="utf-8-sig") as handle:
@@ -35,7 +36,7 @@ def read_src_rec(path: Path) -> list[Event]:
                 except (ValueError, IndexError):
                     is_header = False
                 if is_header:
-                    if event is not None and int(event.parts[11]) != len(event.picks):
+                    if event is not None and int(event.parts[11]) != len(event.picks) + len(event.differentials):
                         raise ValueError("Source receiver count does not match its records.")
                     if len(parts) < 12 or not 1800 <= int(parts[1]) <= 2500:
                         raise ValueError("Expected a TomoATT source header.")
@@ -54,6 +55,13 @@ def read_src_rec(path: Path) -> list[Event]:
                         raise ValueError("Receiver source index does not match its header.")
                     # The preparation workflow is for absolute arrivals. Differential
                     # records have another layout and must not be silently rewritten.
+                    if allow_differential and len(parts) in (13, 14) and parts[11].endswith((',cs', ',cr')):
+                        if not all(math.isfinite(float(parts[i])) for i in (3,4,5,8,9,10,12)):
+                            raise ValueError('Non-finite differential record.')
+                        if len(parts) == 14 and (not math.isfinite(float(parts[13])) or float(parts[13]) < 0):
+                            raise ValueError('Invalid differential weight.')
+                        event.differentials.append(parts)
+                        continue
                     if len(parts) not in (8,9):
                         raise ValueError("Data preparation currently accepts absolute receiver rows with 8 or 9 fields; use the original scripts for differential or extended records.")
                     lat, lon, elev, tt = float(parts[3]), float(parts[4]), float(parts[5]), float(parts[7])
@@ -66,7 +74,7 @@ def read_src_rec(path: Path) -> list[Event]:
                 raise ValueError(f"{path.name}, line {number}: {exc}") from exc
     if not events or not any(event.picks for event in events):
         raise ValueError("No source/receiver arrivals found.")
-    if int(events[-1].parts[11]) != len(events[-1].picks):
+    if int(events[-1].parts[11]) != len(events[-1].picks) + len(events[-1].differentials):
         raise ValueError("Final source receiver count does not match its records.")
     return events
 

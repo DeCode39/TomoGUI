@@ -2,6 +2,31 @@
 
 Versions follow Semantic Versioning. Git tags use `vMAJOR.MINOR.PATCH`.
 
+## [0.2.0] - 2026-11-19
+
+- Keep smooth sinusoidal checkerboards and stage the default 8/4/2 checker-count
+  sets. Enforce two model-grid cells per axis per checker and half-domain maximum
+  lengths, with live validity feedback and read-only run-plan errors.
+- Validate Kd lobe widths; preserve original wavelengths by default, with an
+  explicit, recorded fitting option when the grid/domain requires it.
+- Make the actual-data baseline ABS-only through relocation, joint inversion,
+  and final relocation. Preserve reference observations and pre-omission quality.
+- Add adjustable CS/CR pair previews and staged ABS+CR -> ABS+CR+CS -> ABS+new CR
+  refinement from the completed baseline model and observed catalogue.
+- Default to both-pick top-quality CR with <10 km 3D source separation; CS uses
+  <30 degree station azimuth difference and <3 km baseline event displacement.
+- Add paired 8/4/2 ABS-control versus differential resolution suites, shared
+  noisy absolute data, relative-anisotropy scoring and explicit acceptance gates.
+- Fingerprint staged/scored inputs and outputs, reject stale acceptance, and
+  rebuild pairs from completed observed-data handoffs at each external stage.
+- Expand isolated pair-selection, sinusoid, staging and scoring regression tests;
+  update public-repository installation and scientific workflow documentation.
+
+Validation uses isolated catalogues and explicit recovered-model fixtures.
+An installed TomoATT forward-mode smoke test also verifies a mixed ABS/CS/CR file.
+Production MPI/HPC convergence and scientific resolution still require actual
+solver runs and review for each dataset.
+
 ## [0.1.0] - 2026-11-01
 
 First GitHub release (alpha).

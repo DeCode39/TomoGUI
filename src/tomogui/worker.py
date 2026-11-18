@@ -153,6 +153,7 @@ def filter_region(ws: Workspace, payload: dict) -> dict:
 
 
 def model_preview(ws: Workspace, payload: dict) -> dict:
+    from .checkerboards import geometry, build
     state = ws.read_state()
     region = state.get("region")
     if not region:
@@ -167,6 +168,9 @@ def model_preview(ws: Workspace, payload: dict) -> dict:
     grid = grid_estimate(ws.root, metadata, payload.get('grid'))
     if math.prod(grid['n_rtp']) > 20_000_000:
         raise ValueError("This preview exceeds 20 million grid nodes. Increase spacing for an interactive preview.")
+    if payload.get('kind', 'checkerboard') == 'checkerboard':
+        values = {**checker_defaults(ws.root, phase), **payload.get('checkerboard', {})}
+        geometry(grid, [values[k] for k in ('n_pert_x','n_pert_y','n_pert_z')])
     folder = ws.artifact("models")
     template = ws.root / f"RESULTS/TEST/checkerboard_{phase}"
     params = yaml.safe_load((template / "3_input_params/input_params_signal.yaml").read_text(encoding="utf-8"))
@@ -202,10 +206,8 @@ def model_preview(ws: Workspace, payload: dict) -> dict:
             if not math.isfinite(value) or (name != 'ani_dir' and not 0 <= value < 1):
                 raise ValueError("Perturbation strengths must be finite fractions in [0, 1).")
             config[name] = value
-        checker = module.Checker(str(initial), para_fname=str(param_file))
-        checker.checkerboard(**config)
         output = folder / 'model.h5'
-        checker.write(str(output))
+        build(module, initial, param_file, grid, config, output)
     else:
         raise ValueError("Unknown model preset.")
     model = {"path": str(output), "initial": str(initial), "phase": phase, "kind": kind,
@@ -224,6 +226,9 @@ def main():
     operations = {'prepare_data': prepare_data, 'filter_region': filter_region, 'model_preview': model_preview}
     from .runs import generate, execute, score, select_kd, postprocess
     operations.update(generate=generate, execute=execute, score=score, select_kd=select_kd, postprocess=postprocess)
+    from . import differential, resolution
+    operations.update(dd_preview=differential.preview, dd_prepare=differential.prepare,
+                      dd_execute=differential.execute, dd_score=resolution.score, dd_accept=differential.accept)
     if spec['operation'] not in operations:
         raise ValueError('Unknown workflow operation.')
     result = operations[spec['operation']](ws, spec['payload'])

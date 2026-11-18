@@ -140,13 +140,13 @@ class WorkflowTests(unittest.TestCase):
     def test_filter_model_generate_score_handoff(self):
         region = self.region()
         self.assertEqual(region['summary']['n_picks'],48)
-        model = model_preview(self.ws,{'kind':'checkerboard','phase':'P'})['model']
+        model = model_preview(self.ws,{'kind':'checkerboard','phase':'P','grid':{'receiver_spacing':5}})['model']
         self.assertTrue(Path(model['path']).is_file())
         viewer = Viewer(self.ws)
         section = viewer.slice({'A':model['path'],'B':model['initial'],'expression':'100 * (A.vel - B.vel) / B.vel','axis':'z','position':8})
         self.assertLess(section['limits'][0],0)
         self.assertGreater(section['limits'][1],0)
-        payload = {'phases':['P'],'kd_candidates':[0,.5]}
+        payload = {'phases':['P'],'kd_candidates':[0,.5],'grid':{'receiver_spacing':5},'fit_kd_waves':True}
         before = set(self.ws.state_dir.rglob('*'))
         plan = preview(self.ws, payload)
         self.assertEqual(set(self.ws.state_dir.rglob('*')), before)

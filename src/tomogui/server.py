@@ -59,6 +59,12 @@ class Application:
             return self.workspace.browse(value('path'))
         if route == '/api/jobs':
             return self.jobs.list()
+        if route == '/api/dd-report':
+            with self.jobs.lock:
+                job = self.jobs.records.get(value('id'))
+                if not job or job['operation'] != 'dd_preview' or job['status'] != 'completed':
+                    raise ValueError('The differential preview is not completed.')
+                return job['result']
         if route == '/api/log':
             return {'text': self.jobs.log(value('id'))}
         if route == '/api/results':
@@ -81,7 +87,11 @@ class Application:
                 raise ValueError('Select P or S for the grid preview.')
             phase_file = Path(region['metadata_path']).parent / phase / 'region_metadata.json'
             metadata = json.loads(phase_file.read_text(encoding='utf-8')) if phase_file.exists() else region['metadata']
-            return grid_estimate(self.workspace.root, metadata, payload)
+            from .checkerboards import preset_report, geometry
+            result = grid_estimate(self.workspace.root, metadata, payload)
+            result['checkerboards'] = preset_report(result)
+            result['selected_checkerboard'] = geometry(result, payload.get('checker_counts', [2,2,2]), strict=False)
+            return result
         if route == '/api/quality':
             return {'weights': [quality_weight(v, 1.0, payload['spec']) for v in payload.get('values', [0,1,2,3])]}
         if route == '/api/run/preview':
@@ -101,6 +111,8 @@ class Application:
                       '/api/model/build': 'model_preview', '/api/run/generate': 'generate',
                       '/api/run/execute': 'execute', '/api/run/score': 'score',
                       '/api/run/select-kd': 'select_kd', '/api/postprocess': 'postprocess'}
+        operations.update({'/api/dd/preview':'dd_preview','/api/dd/prepare':'dd_prepare',
+                           '/api/dd/execute':'dd_execute','/api/dd/score':'dd_score','/api/dd/accept':'dd_accept'})
         if route in operations:
             return {'job': self.jobs.start(operations[route], payload)}
         raise ValueError('Unknown API route.')

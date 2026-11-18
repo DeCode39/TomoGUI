@@ -16,6 +16,8 @@ import yaml
 
 from .defaults import current_defaults, grid_estimate, resolution_defaults
 from .workspace import load_module
+from .checkerboards import PRESETS, geometry, preset_report, fit_waves, build
+from .differential import settings as dd_settings, quality_snapshot, set_data_flags, install_runner
 
 
 def patch_scalar(path: Path, name: str, value) -> None:
@@ -47,8 +49,10 @@ def runner(folder: Path, tasks: int, synthetic: bool, config: dict, dual: bool =
     import shlex
     template = folder / 'run_this_example_slurm.sh'
     header = '\n'.join(line for line in template.read_text(encoding='utf-8').splitlines() if line.startswith('#SBATCH'))
-    options = ' '.join(shlex.quote(str(s)) for s in ['--n-pert', ','.join(str(config[k]) for k in ('n_pert_x','n_pert_y','n_pert_z')),
-                          '--pert-vel', config['pert_vel'], '--pert-ani', config['pert_ani'], '--ani-dir', config['ani_dir']])
+    options = ''
+    if synthetic and not (dual or inversion_only):
+        options = ' '.join(shlex.quote(str(s)) for s in ['--n-pert', ','.join(str(config[k]) for k in ('n_pert_x','n_pert_y','n_pert_z')),
+                              '--pert-vel', config['pert_vel'], '--pert-ani', config['pert_ani'], '--ani-dir', config['ani_dir']])
     prepare = '' if dual or inversion_only else 'python prepare_input_files.py' + (' ' + options if synthetic else '') + '\n'
     files = ['input_params_signal.yaml', 'input_params_inv.yaml'] if synthetic else ['input_params_joint_step1.yaml','input_params_joint_step2.yaml','input_params_joint_step3.yaml']
     if signal_only:
@@ -114,11 +118,22 @@ def preview(ws, payload):
             if not math.isfinite(value) or (key != 'ani_dir' and not 0 <= value < 1):
                 raise ValueError('Perturbation strengths must be finite fractions in [0, 1).')
     grids = {}
+    reports, fitted, errors = {}, {}, []
     entries = ['dataset/', 'tomogui_run.json']
     for phase in phases:
         metadata_path = Path(region['metadata_path']).parent / phase / 'region_metadata.json'
         metadata = json.loads(metadata_path.read_text(encoding='utf-8')) if metadata_path.exists() else region['metadata']
         grids[phase] = grid_estimate(ws.root, metadata, model_settings['grid'])
+        reports[phase] = preset_report(grids[phase])
+        for report in reports[phase]:
+            errors.extend(f'{phase} {report["counts"]}: {message}' for message in report['errors'])
+        if model_settings.get('kind', 'checkerboard') == 'checkerboard':
+            report = geometry(grids[phase], [config[k] for k in ('n_pert_x','n_pert_y','n_pert_z')], strict=False)
+            errors.extend(report['errors'])
+        try:
+            fitted[phase] = fit_waves(grids[phase], workflow['waves'], allow_fit=bool(payload.get('fit_kd_waves')))
+        except ValueError as exc:
+            errors.append(phase + ': ' + str(exc))
         if math.prod(grids[phase]['n_rtp']) > 20_000_000:
             raise ValueError('The model exceeds 20 million nodes. Increase grid spacing before generation.')
         paper = ws.root / f'RESULTS/JpGU/templates/checkerboard_{phase}_paper_base/prepare_input_files.py'
@@ -127,6 +142,7 @@ def preview(ws, payload):
         for kind in ('checkerboard', 'inversion'):
             entries.extend([f'{kind}_{phase}/', '  1_src_rec_files/src_rec_config.dat', '  2_models/', '  3_input_params/',
                             '  run_tomogui_local.sh', '  run_tomogui_slurm.sh'])
+        entries.extend(f'checkerboard_{phase}_{n}{n}{n}/  (default validation case)' for n in PRESETS)
         entries.append(f'resolution_kd_{phase}/')
         for wave_tag in workflow['waves']:
             entries.append(f'  {wave_tag}/signal/  (shared noisy observations)')
@@ -136,12 +152,15 @@ def preview(ws, payload):
             'signal_jobs': len(phases) * len(workflow['waves']), 'sweep_jobs': len(phases) * len(workflow['waves']) * len(kds),
             'keep_pick_weights': payload.get('keep_pick_weights', state.get('keep_pick_weights', defaults['keep_pick_weights'])),
             'heavy_outputs': bool(payload.get('heavy_outputs')), 'model_settings': model_settings,
-            'sequence': defaults['sequence']}
+            'sequence': defaults['sequence'], 'valid': not errors, 'errors': errors,
+            'checkerboards': reports, 'fitted_waves': fitted, 'differential': dd_settings(payload.get('differential'))}
 
 
 def generate(ws, payload):
     from .worker import model_preview
     plan = preview(ws, payload)
+    if not plan['valid']:
+        raise ValueError('; '.join(plan['errors']))
     state = ws.read_state()
     region = state['region']
     phases = plan['phases']; kds = plan['kd_candidates']
@@ -163,9 +182,11 @@ def generate(ws, payload):
         sys.argv = old_args
     target = next(p for p in folder.iterdir() if p.is_dir())
     record = {'root': str(target), 'phases': phases, 'sequence': defaults['sequence'], 'selected_kd': {},
-              'validated': False, 'settings': payload, 'cases': [], 'grids': {}, 'signals': {}}
+              'validated': False, 'settings': {**payload, 'differential': plan['differential']},
+              'cases': [], 'grids': {}, 'signals': {}, 'validation_cases': [], 'format_version': 2}
     model_settings = plan['model_settings']
     record['kd_workflow'] = plan['kd_workflow']
+    record['fitted_waves'] = plan['fitted_waves']
     for phase in phases:
         model_settings['phase'] = phase
         model = model_preview(ws, model_settings)['model']
@@ -175,6 +196,11 @@ def generate(ws, payload):
         grid = model['grid']; record['grids'][phase] = grid
         config = {**defaults['checkerboard'], **model_settings.get('checkerboard', {})}
         name = '_'.join(str(n) for n in grid['n_rtp'])
+        reference = Path(region['metadata_path']).parent / phase / 'src_rec.dat'
+        if not reference.exists():
+            reference = Path(region['summary']['path'])
+        shutil.copy2(reference, target / f'dataset/reference_{phase}.dat')
+        save(target / f'dataset/quality_{phase}.json', quality_snapshot(reference))
         for kind in ('checkerboard', 'inversion'):
             case = target / f'{kind}_{phase}'
             for path in (case / '3_input_params').glob('*.yaml'):
@@ -196,11 +222,28 @@ def generate(ws, payload):
             if kind == 'checkerboard':
                 shutil.copy2(model['path'], case / f'2_models/model_ckb_N{name}.h5')
             tasks = min(56, max(1, prep._count_unique_stations(case / '1_src_rec_files/src_rec_config.dat')))
-            runner(case, tasks, kind == 'checkerboard', config, model_settings.get('kind') == 'dual_layer' and kind == 'checkerboard')
+            if kind == 'inversion':
+                set_data_flags(case, refinement=False)
+            runner(case, tasks, kind == 'checkerboard', config, dual=kind == 'checkerboard')
+            if kind == 'inversion':
+                install_runner(case)
         template = target / f'checkerboard_{phase}'
+        main_counts = [config[k] for k in ('n_pert_x','n_pert_y','n_pert_z')]
+        record['validation_cases'].append({'phase': phase, 'counts': main_counts, 'run_dir': str(template)})
+        for count in PRESETS:
+            if main_counts == [count]*3 and model_settings.get('kind', 'checkerboard') == 'checkerboard':
+                continue
+            case = target / f'checkerboard_{phase}_{count}{count}{count}'
+            shutil.copytree(template, case)
+            case_config = {**config, 'n_pert_x':count,'n_pert_y':count,'n_pert_z':count}
+            module = load_module(ws.root / f'RESULTS/TEST/checkerboard_{phase}/prepare_input_files.py')
+            build(module, case / f'2_models/model_init_N{name}.h5', case / '3_input_params/input_params_signal.yaml',
+                  grid, case_config, case / f'2_models/model_ckb_N{name}.h5')
+            runner(case, tasks, True, case_config, dual=True)
+            record['validation_cases'].append({'phase': phase, 'counts': [count]*3, 'run_dir': str(case)})
         sweep_helper = load_module(ws.root / 'RESULTS/resolution_kd_sweep/prepare_resolution_kd_sweep.py')
         paper_path = ws.root / f'RESULTS/JpGU/templates/checkerboard_{phase}_paper_base/prepare_input_files.py'
-        for wave_tag, wave in plan['kd_workflow']['waves'].items():
+        for wave_tag, wave in plan['fitted_waves'][phase]['waves'].items():
             signal_folder = target / f'resolution_kd_{phase}' / wave_tag / 'signal'
             shutil.copytree(template, signal_folder)
             # Copy and patch the existing sinusoidal helper, preserving its 3%
@@ -245,10 +288,20 @@ def execute(ws, payload):
         raise ValueError('Score the resolution runs and select a Kd coefficient for each phase first.')
     if stage == 'inversion' and not data['validated']:
         raise ValueError('Inspect and accept the checkerboard recovery before actual inversion.')
-    folders = [Path(row['run_dir']) for row in data['cases']] if stage == 'resolution_kd' else [Path(data['root']) / f'{stage}_{p}' for p in data['phases']]
+    if stage == 'resolution_kd':
+        folders = [Path(row['run_dir']) for row in data['cases']]
+    elif stage == 'checkerboard' and data.get('validation_cases'):
+        folders = [Path(row['run_dir']) for row in data['validation_cases']]
+    else:
+        folders = [Path(data['root']) / f'{stage}_{p}' for p in data['phases']]
     profile = payload.get('profile', 'slurm')
     if profile not in {'local', 'slurm'}:
         raise ValueError('Use local MPI or Slurm from the environment running TomoGUI.')
+    if stage == 'inversion':
+        data.pop('differential', None)
+        save(path, data)
+        for folder in folders:
+            save(folder / 'tomogui_completed.json', {'state':'queued','started':time.time()})
     signal_jobs = {}
     if stage == 'resolution_kd':
         for phase, folder_text in data.get('signals', {}).items():
@@ -272,10 +325,9 @@ def execute(ws, payload):
     return {'message': 'Slurm submissions sent; completion is determined from output files.' if profile == 'slurm' else 'Stage completed.', 'stage': stage}
 
 
-def score(ws, payload):
-    path, data = manifest(ws)
+def compute_model_scores(ws, cases, root, *, relative_anisotropy=False):
     scorer = load_module(ws.root / 'RESULTS/resolution_kd_sweep/score_resolution_kd_sweep.py')
-    scorer.ROOT = Path(data['root'])
+    scorer.ROOT = Path(root)
     # Preserve the scorer's metric, while using the existing viewer's mapping
     # for native TomoATT files that keep coordinates in a sibling YAML.
     from .viewer import Viewer
@@ -287,6 +339,13 @@ def score(ws, payload):
             raise ValueError(f'Physical coordinates could not be resolved for {model_path}. Keep its parameter YAML with the model.')
         arrays = {key: np.transpose(value, (2,1,0)) for key,value in volume.fields.items()}
         arrays.update(dep=volume.coords['z'], lat=volume.coords['y'], lon=volume.coords['x'])
+        if relative_anisotropy:
+            if coords_from is None:
+                arrays['_background_xi'], arrays['_background_eta'] = arrays['xi'].copy(), arrays['eta'].copy()
+                arrays['xi'], arrays['eta'] = np.zeros_like(arrays['xi']), np.zeros_like(arrays['eta'])
+            else:
+                arrays['xi'] = arrays['xi'] - coords_from['_background_xi']
+                arrays['eta'] = arrays['eta'] - coords_from['_background_eta']
         if coords_from is not None:
             for key in ('dep','lat','lon'):
                 if arrays[key].shape != coords_from[key].shape or not np.allclose(arrays[key],coords_from[key]):
@@ -296,7 +355,7 @@ def score(ws, payload):
     args = argparse.Namespace(threshold=.7, energy_floor=.02, artifact_weight=10.0,
                              window_depth_km=10.0, window_lat_deg=.5, window_lon_deg=.5)
     scores = []
-    for row in data['cases']:
+    for row in cases:
         scoring_row = {key: str(value) for key,value in row.items()}
         # The legacy scorer labels sinusoidal-paper wavelengths. Its metric also
         # works on the current checkerboard; those labels are inapplicable here.
@@ -312,6 +371,13 @@ def score(ws, payload):
         raise ValueError('No completed sweep models found. Run or download the resolution outputs first.')
     if any(not math.isfinite(float(row['score'])) for row in scores):
         raise ValueError('Non-finite resolution scores; inspect true/recovered models and signal support.')
+    return scores
+
+
+def score(ws, payload):
+    path, data = manifest(ws)
+    scorer = load_module(ws.root / 'RESULTS/resolution_kd_sweep/score_resolution_kd_sweep.py')
+    scores = compute_model_scores(ws, data['cases'], data['root'])
     summary = Path(data['root']) / 'resolution_scores.csv'
     scorer.write_csv(summary, scores)
     data['scores'] = scores
@@ -338,8 +404,10 @@ def score(ws, payload):
 def select_kd(ws, payload):
     path, data = manifest(ws)
     if payload.get('accept_validation'):
-        for phase in data['phases']:
-            params = Path(data['root']) / f'checkerboard_{phase}/3_input_params/input_params_inv.yaml'
+        cases = data.get('validation_cases') or [{'phase':p,'run_dir':str(Path(data['root']) / f'checkerboard_{p}')} for p in data['phases']]
+        for case in cases:
+            phase = case['phase']
+            params = Path(case['run_dir']) / '3_input_params/input_params_inv.yaml'
             output = yaml.safe_load(params.read_text(encoding='utf-8'))['output_setting']['output_dir']
             if not (params.parents[1] / output / 'final_model.h5').exists():
                 raise ValueError(f'Missing checkerboard recovery for {phase}.')
@@ -352,12 +420,19 @@ def select_kd(ws, payload):
             raise ValueError('Select a coefficient with a completed, scored resolution run.')
         if data.get('aggregate_scores') and not any(row['phase'] == phase and row['kdensity_coe'] == kd and row['complete'] for row in data['aggregate_scores']):
             raise ValueError('Complete all wavelength tests for this coefficient before selecting it.')
-        for folder in (Path(data['root']) / f'checkerboard_{phase}', Path(data['root']) / f'inversion_{phase}'):
+        folders = [Path(data['root']) / f'inversion_{phase}']
+        folders += [Path(row['run_dir']) for row in data.get('validation_cases', []) if row['phase'] == phase]
+        if not data.get('validation_cases'):
+            folders.append(Path(data['root']) / f'checkerboard_{phase}')
+        for folder in folders:
             for params in (folder / '3_input_params').glob('*.yaml'):
                 if re.search(r'(?m)^\s*Kdensity_coe:', params.read_text(encoding='utf-8')):
                     patch_scalar(params, 'Kdensity_coe', kd)
         if data['selected_kd'].get(phase) != kd:
             data.setdefault('selected_at',{})[phase] = time.time()
+            # Keep generated folders for inspection, but require a newly staged
+            # comparison if the parent experiment's coefficient changes.
+            data.pop('differential', None)
         data['selected_kd'][phase] = kd
         data['validated'] = False
     save(path, data)
